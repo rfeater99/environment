@@ -1,0 +1,76 @@
+version: '3'
+
+services:
+  env:
+    build:
+      context: ./env
+      dockerfile: Dockerfile
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=development
+      - MYSQL_ROOT_PASSWORD=root
+    tty: true
+    volumes:
+      - ./env/dotfiles/.zshrc:/home/yusaku/.zshrc
+      - ./env/dotfiles/.tmux.conf:/home/yusaku/.tmux.conf
+      - ./env/dotfiles/.config/nvim/init.vim:/home/yusaku/.config/nvim/init.vim
+      - ./env/dotfiles/.cache/dein/conf:/home/yusaku/.cache/dein/conf
+    networks: 
+      - db-network
+
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=development
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - db-data:/var/lib/mysql
+    networks: 
+      - db-network
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    tty: true
+    ports:
+      - "3000:3000"
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=development
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ./:/app
+    networks:
+      - db-network
+      - asset-network
+
+  asset:
+    build:
+      context: ./asset
+      dockerfile: Dockerfile
+    tty: true
+    ports:
+      - "3035:3035"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./:/app
+    networks:
+      - assert-network
+
+volumes:
+  db-data:
+
+networks:
+  db-network:
+  asset-network:
