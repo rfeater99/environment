@@ -6,4 +6,5 @@ WORKDIR /app
 RUN apt-get update \
     && apt install -y nodejs \
     && bundle config build.nokogiri --use-system-libraries \
+    && gem isntall bundler \
     && gem install rails

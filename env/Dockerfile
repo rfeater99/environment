@@ -1,5 +1,7 @@
 FROM ubuntu:latest
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update -y
 
 # base packages
@@ -9,22 +11,24 @@ RUN apt-get install curl file sudo zsh xsel git \
     && apt-get install autoconf bison \
          build-essential libssl-dev libyaml-dev \
          libreadline6-dev zlib1g-dev libncurses5-dev \
-         libffi-dev libgdbm5 libgdbm-dev -y
+         libffi-dev libgdbm5 libgdbm-dev \
+         tzdata \
+         mysql-client libmysqlclient-dev -y
 ENV LANG ja_JP.UTF-8
 
 # user
 RUN echo 'root:root' |chpasswd \
-    && useradd -m yusaku \
-    && echo "yusaku ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-    && echo 'yusaku:yusaku' | chpasswd \
-    && chsh -s /usr/bin/zsh yusaku \
-    && mkdir -p /home/yusaku/.config/nvim \
-    && mkdir -p /home/yusaku/.cache/dein \
-    && chown yusaku:yusaku -R /home/yusaku
+    && useradd -m developer \
+    && echo "developer ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+    && echo 'developer:developer' | chpasswd \
+    && chsh -s /usr/bin/zsh developer \
+    && mkdir -p /home/developer/.config/nvim \
+    && mkdir -p /home/developer/.cache/dein \
+    && chown developer:developer -R /home/developer
 
-USER yusaku
-WORKDIR /home/yusaku
-ENV USER yusaku
+USER developer
+WORKDIR /home/developer
+ENV USER developer
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)" \
     && /home/linuxbrew/.linuxbrew/bin/brew install neovim tmux tree wget python3 \
     && /home/linuxbrew/.linuxbrew/bin/pip install neovim \
@@ -39,4 +43,4 @@ RUN curl -L git.io/nodebrew | perl - setup \
 RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv \
     && cd ~/.rbenv && src/configure && make -C src \
     && git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build \
-    && ~/.rbenv/bin/rbenv install 2.5.3
+    && ~/.rbenv/bin/rbenv install 2.5.1 \

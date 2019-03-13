@@ -10,12 +10,22 @@ services:
       - MYSQL_PASSWORD=root
       - MYSQL_DATABASE=development
       - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
     tty: true
+    ports:
+      - "3000:3000"
     volumes:
-      - ./env/dotfiles/.zshrc:/home/yusaku/.zshrc
-      - ./env/dotfiles/.tmux.conf:/home/yusaku/.tmux.conf
-      - ./env/dotfiles/.config/nvim/init.vim:/home/yusaku/.config/nvim/init.vim
-      - ./env/dotfiles/.cache/dein/conf:/home/yusaku/.cache/dein/conf
+      - ./env/dotfiles/.zshrc:/home/developer/.zshrc
+      - ./env/dotfiles/.tmux.conf:/home/developer/.tmux.conf
+      - ./env/dotfiles/.config/nvim/init.vim:/home/developer/.config/nvim/init.vim
+      - ./env/dotfiles/.cache/dein/conf:/home/developer/.cache/dein/conf
+      - ../myapp:/home/developer/work:cached
+      - /home/developer/work/vendor
+      - /home/developer/work/node_modules
+      - /home/developer/work/tmp
+      - /home/developer/work/log
+      - /home/developer/work/.git
     networks: 
       - db-network
 
@@ -36,37 +46,44 @@ services:
     networks: 
       - db-network
 
-  app:
-    build:
-      context: ./app
-      dockerfile: Dockerfile
-    tty: true
-    ports:
-      - "3000:3000"
-    environment:
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=root
-      - MYSQL_DATABASE=development
-      - MYSQL_ROOT_PASSWORD=root
-    volumes:
-      - ./:/app
-    networks:
-      - db-network
-      - asset-network
+  # app:
+  #   build:
+  #     context: ./app
+  #     dockerfile: Dockerfile
+  #   tty: true
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - DB_USER=root
+  #     - DB_PASS=root
+  #     - DB_HOST=db
+  #     - DB_PORT=3306
+  #   volumes:
+  #     - ../todo-vue:/app
+  #   depends_on:
+  #     - db
+  #     - asset
+  #   networks:
+  #     - db-network
+  #     - asset-network
+  #   command: >
+  #     bundle install --path vendor/bundle 
 
-  asset:
-    build:
-      context: ./asset
-      dockerfile: Dockerfile
-    tty: true
-    ports:
-      - "3035:3035"
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./:/app
-    networks:
-      - assert-network
+  # asset:
+  #   build:
+  #     context: ./asset
+  #     dockerfile: Dockerfile
+  #   tty: true
+  #   ports:
+  #     - "3035:3035"
+  #   environment:
+  #     - NODE_ENV=development
+  #   volumes:
+  #     - ../todo-vue:/app
+  #   networks:
+  #     - asset-network
+  #   command: >
+  #     sh -c "yarn install; yarn run start"
 
 volumes:
   db-data:
